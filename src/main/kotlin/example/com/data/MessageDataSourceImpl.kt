@@ -30,6 +30,7 @@ class MessageDataSourceImpl(
                         it[Messages.timestamp]
                     )
                 }
+                .sortedByDescending { it.timestamp }
         }
     }
 
@@ -46,12 +47,13 @@ class MessageDataSourceImpl(
                         it[Messages.timestamp]
                     )
                 }
+                .sortedByDescending { it.timestamp }
         }
     }
 
     override suspend fun getMessageForUser(userId: String): List<MessageDto> {
         return dbQuery {
-            Message.find { Messages.username eq userId }.map { it.toMessageDto() }
+            Message.find { Messages.username eq userId }.map { it.toMessageDto() }.sortedByDescending { it.timestamp }
         }
     }
 

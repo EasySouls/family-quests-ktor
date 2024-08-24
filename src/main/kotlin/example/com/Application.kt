@@ -8,11 +8,10 @@ fun main(args: Array<String>) {
 }
 
 fun Application.module() {
-    configureSockets()
-    configureFrameworks()
-    configureSerialization()
-    configureDatabases()
     configureMonitoring()
+    configureSerialization()
     configureSecurity()
+    configureFrameworks()
+    configureSockets()
     configureRouting()
 }

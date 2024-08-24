@@ -1,5 +1,6 @@
 package example.com.plugins
 
+import example.com.routes.chatSocket
 import io.ktor.serialization.kotlinx.*
 import io.ktor.server.application.*
 import io.ktor.server.response.*

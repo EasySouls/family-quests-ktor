@@ -5,7 +5,7 @@ import kotlinx.datetime.Clock
 
 class FakeMessageDataSource : MessageDataSource {
 
-    val messages = mutableListOf<MessageDto>(
+    private val messages = mutableListOf<MessageDto>(
         MessageDto( 1,  "Hello", "Alice","1", Clock.System.now()),
         MessageDto(2,"Hi", "Bob", "1", Clock.System.now()),
         MessageDto(3,"Hey", "Charlie", "1", Clock.System.now()),
@@ -13,14 +13,14 @@ class FakeMessageDataSource : MessageDataSource {
         MessageDto(5,"Bonjour", "Eve", "1", Clock.System.now()),
     )
 
-    override suspend fun getAllMessages(): List<MessageDto> = messages
+    override suspend fun getAllMessages(): List<MessageDto> = messages.sortedByDescending { it.timestamp }
 
     override suspend fun getMessagesForChannel(channelId: String): List<MessageDto> {
-        return messages.filter { it.channelId == channelId }
+        return messages.filter { it.channelId == channelId }.sortedByDescending { it.timestamp }
     }
 
     override suspend fun getMessageForUser(userId: String): List<MessageDto> {
-        return messages.filter { it.username == userId }
+        return messages.filter { it.username == userId }.sortedByDescending { it.timestamp }
     }
 
     override suspend fun insertMessage(message: MessageDto) {
