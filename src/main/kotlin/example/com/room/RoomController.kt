@@ -1,7 +1,7 @@
 package example.com.room
 
 import example.com.data.MessageDataSource
-import example.com.data.model.MessageDto
+import example.com.data.model.Message
 import io.ktor.websocket.*
 import kotlinx.datetime.Clock
 import kotlinx.serialization.encodeToString
@@ -24,21 +24,21 @@ class RoomController(
 
     suspend fun sendMessage(senderUsername: String, message: String, channelId: String) {
         members.values.forEach { member ->
-            val messageDto = MessageDto(
+            val message = Message(
                 id = 0,
                 text = message,
                 username = senderUsername,
                 channelId = channelId,
                 timestamp = Clock.System.now()
             )
-            messageDataSource.insertMessage(messageDto)
+            messageDataSource.insertMessage(message)
 
-            val parsedMessage = Json.encodeToString(messageDto)
+            val parsedMessage = Json.encodeToString(message)
             member.socket.send(Frame.Text(parsedMessage))
         }
     }
 
-    suspend fun getAllMessages(): List<MessageDto> {
+    suspend fun getAllMessages(): List<Message> {
         return messageDataSource.getAllMessages()
     }
 

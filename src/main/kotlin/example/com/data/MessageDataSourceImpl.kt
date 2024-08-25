@@ -1,8 +1,8 @@
 package example.com.data
 
+import example.com.data.model.MessageDao
 import example.com.data.model.Message
-import example.com.data.model.MessageDto
-import example.com.data.model.Messages
+import example.com.data.model.MessagesTable
 import kotlinx.coroutines.Dispatchers
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
@@ -14,51 +14,32 @@ class MessageDataSourceImpl(
 
     init {
         transaction(database) {
-            SchemaUtils.create(Messages)
+            SchemaUtils.create(MessagesTable)
         }
     }
 
-    override suspend fun getAllMessages(): List<MessageDto> {
+    override suspend fun getAllMessages(): List<Message> {
         return dbQuery {
-            Messages.selectAll()
-                .map {
-                    MessageDto(
-                        it[Messages.id].value,
-                        it[Messages.text],
-                        it[Messages.username],
-                        it[Messages.channelId],
-                        it[Messages.timestamp]
-                    )
-                }
+            MessageDao.all().map { it.toMessage() }.sortedByDescending { it.timestamp }
+        }
+    }
+
+    override suspend fun getMessagesForChannel(channelId: String): List<Message> {
+        return dbQuery {
+            MessageDao.find { MessagesTable.channelId eq channelId }
+                .map { it.toMessage() }
                 .sortedByDescending { it.timestamp }
-        }
+            }
     }
 
-    override suspend fun getMessagesForChannel(channelId: String): List<MessageDto> {
+    override suspend fun getMessageForUser(userId: String): List<Message> {
         return dbQuery {
-            Messages.selectAll()
-                .where { Messages.channelId eq channelId }
-                .map {
-                    MessageDto(
-                        it[Messages.id].value,
-                        it[Messages.text],
-                        it[Messages.username],
-                        it[Messages.channelId],
-                        it[Messages.timestamp]
-                    )
-                }
-                .sortedByDescending { it.timestamp }
+            MessageDao.find { MessagesTable.username eq userId }.map { it.toMessage() }.sortedByDescending { it.timestamp }
         }
     }
 
-    override suspend fun getMessageForUser(userId: String): List<MessageDto> {
-        return dbQuery {
-            Message.find { Messages.username eq userId }.map { it.toMessageDto() }.sortedByDescending { it.timestamp }
-        }
-    }
-
-    override suspend fun insertMessage(message: MessageDto): Unit = dbQuery {
-        Message.new {
+    override suspend fun insertMessage(message: Message): Unit = dbQuery {
+        MessageDao.new {
             text = message.text
             username = message.username
             channelId = message.channelId
@@ -68,7 +49,7 @@ class MessageDataSourceImpl(
 
     override suspend fun removeMessage(messageId: Int): Boolean =
         dbQuery {
-            val message = Message.findById(messageId) ?: return@dbQuery false
+            val message = MessageDao.findById(messageId) ?: return@dbQuery false
             message.delete()
             true
         }

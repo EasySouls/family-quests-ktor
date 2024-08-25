@@ -1,29 +1,29 @@
 package example.com.data
 
-import example.com.data.model.MessageDto
+import example.com.data.model.Message
 import kotlinx.datetime.Clock
 
 class FakeMessageDataSource : MessageDataSource {
 
-    private val messages = mutableListOf<MessageDto>(
-        MessageDto( 1,  "Hello", "Alice","1", Clock.System.now()),
-        MessageDto(2,"Hi", "Bob", "1", Clock.System.now()),
-        MessageDto(3,"Hey", "Charlie", "1", Clock.System.now()),
-        MessageDto(4,"Hola", "David", "1", Clock.System.now()),
-        MessageDto(5,"Bonjour", "Eve", "1", Clock.System.now()),
+    private val messages = mutableListOf<Message>(
+        Message( 1,  "Hello", "Alice","1", Clock.System.now()),
+        Message(2,"Hi", "Bob", "1", Clock.System.now()),
+        Message(3,"Hey", "Charlie", "1", Clock.System.now()),
+        Message(4,"Hola", "David", "1", Clock.System.now()),
+        Message(5,"Bonjour", "Eve", "1", Clock.System.now()),
     )
 
-    override suspend fun getAllMessages(): List<MessageDto> = messages.sortedByDescending { it.timestamp }
+    override suspend fun getAllMessages(): List<Message> = messages.sortedByDescending { it.timestamp }
 
-    override suspend fun getMessagesForChannel(channelId: String): List<MessageDto> {
+    override suspend fun getMessagesForChannel(channelId: String): List<Message> {
         return messages.filter { it.channelId == channelId }.sortedByDescending { it.timestamp }
     }
 
-    override suspend fun getMessageForUser(userId: String): List<MessageDto> {
+    override suspend fun getMessageForUser(userId: String): List<Message> {
         return messages.filter { it.username == userId }.sortedByDescending { it.timestamp }
     }
 
-    override suspend fun insertMessage(message: MessageDto) {
+    override suspend fun insertMessage(message: Message) {
         messages.add(message)
     }
 
